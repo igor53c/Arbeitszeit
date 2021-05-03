@@ -1,7 +1,6 @@
 package glavni.paket.arbeitszeit.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -16,18 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
-import glavni.paket.arbeitszeit.db.Day
 import glavni.paket.arbeitszeit.model.Screen
 import glavni.paket.arbeitszeit.ui.theme.*
 import glavni.paket.arbeitszeit.ui.viewwmodels.MainViewModel
-import glavni.paket.arbeitszeit.uitel.HomeScreen
-import glavni.paket.arbeitszeit.uitel.HoursScreen
-import glavni.paket.arbeitszeit.uitel.SettingScreen
-import kotlinx.coroutines.runBlocking
+import glavni.paket.arbeitszeit.util.HomeScreen
+import glavni.paket.arbeitszeit.util.HoursScreen
+import glavni.paket.arbeitszeit.util.SettingScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -70,7 +66,7 @@ class MainActivity : ComponentActivity() {
                             )
                             /**set design*/
                             BottomNavigation (
-                                elevation = 15.dp,
+                                elevation = 8.dp,
                                 backgroundColor = Color.Transparent,
                                 modifier = Modifier
                                     .padding(8.dp)
@@ -112,14 +108,8 @@ class MainActivity : ComponentActivity() {
 
                         }
                     ){
-                        viewModel.getAllDays().observe(this, Observer {
-                            for(dani: Day in it) {
-                                Log.d("lista", "ID: ${dani.id}      LogIn: ${dani.timeLogIn}        LogOut: ${dani.timeLogOut}")
-                            }
-                        })
                         SreenController(
                             lifecycleOwner = this,
-                            viewModel = viewModel,
                             navController = navController,
                             topTitleBar = titless
                         )
@@ -133,7 +123,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SreenController(
     lifecycleOwner: LifecycleOwner,
-    viewModel: MainViewModel,
     navController: NavHostController,
     topTitleBar: MutableState<String>
 ) {
@@ -143,11 +132,11 @@ fun SreenController(
     )
     {
         composable("home") {
-            HomeScreen(lifecycleOwner, viewModel)
+            HomeScreen(lifecycleOwner)
             topTitleBar.value = "Home"
         }
         composable("hours") {
-            HoursScreen()
+            HoursScreen(lifecycleOwner)
             topTitleBar.value = "Hours"
         }
         composable("setting") {

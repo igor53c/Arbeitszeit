@@ -1,4 +1,4 @@
-package glavni.paket.arbeitszeit.uitel
+package glavni.paket.arbeitszeit.util
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HoursScreen(){
+fun SettingScreen(){
 
     Column (
         modifier = Modifier.fillMaxSize()
             .background(color = Color.Magenta)
+
         ,
         verticalArrangement = Arrangement.Center
     ){
@@ -38,8 +39,8 @@ fun HoursScreen(){
                 shape = CircleShape
             ){
                 Image(modifier = Modifier.padding(25.dp),
-                    imageVector = Icons.Default.AccessTime,
-                    contentDescription ="Hours",
+                    imageVector = Icons.Default.Settings,
+                    contentDescription ="Setting",
                     colorFilter = ColorFilter.lighting(
                         Color.Blue,
                         add = Color.Magenta)
@@ -47,7 +48,7 @@ fun HoursScreen(){
 
             }
             Spacer(modifier = Modifier.padding(5.dp))
-            Text(text = "Hours Screen",
+            Text(text = "Setting Screen",
                 style = TextStyle(
                     fontSize = 22.sp,
                     fontStyle = FontStyle.Normal
