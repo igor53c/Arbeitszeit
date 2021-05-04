@@ -1,19 +1,20 @@
-package glavni.paket.arbeitszeit.ui.viewwmodels
+package glavni.paket.arbeitszeit.ui.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import glavni.paket.arbeitszeit.db.Day
+import glavni.paket.arbeitszeit.other.MyPreference
 import glavni.paket.arbeitszeit.repositories.MainRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(val mainRepository: MainRepository): ViewModel() {
+class MainViewModel @Inject constructor(
+    val mainRepository: MainRepository,
+    val myPreference: MyPreference
+): ViewModel() {
 
     val getLastDay: LiveData<Day> = mainRepository.getLastDay
 

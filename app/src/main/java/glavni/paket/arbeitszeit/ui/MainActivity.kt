@@ -6,12 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
@@ -20,7 +24,7 @@ import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
 import glavni.paket.arbeitszeit.model.Screen
 import glavni.paket.arbeitszeit.ui.theme.*
-import glavni.paket.arbeitszeit.ui.viewwmodels.MainViewModel
+import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
 import glavni.paket.arbeitszeit.util.HomeScreen
 import glavni.paket.arbeitszeit.util.HoursScreen
 import glavni.paket.arbeitszeit.util.SettingScreen
@@ -40,24 +44,6 @@ class MainActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     /**set TopApp And Bottom Bar*/
                     Scaffold (
-                        topBar = {
-                            TopAppBar(
-                                title = {
-                                    Row (
-                                        modifier = Modifier.fillMaxSize(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                            ){
-                                        Text(
-                                            text = titless.value,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    }
-                                },
-                                backgroundColor = RedInit
-                            )
-                        },
                         bottomBar = {
                             val items = listOf<Screen>(
                                 Screen.Home,
@@ -66,14 +52,11 @@ class MainActivity : ComponentActivity() {
                             )
                             /**set design*/
                             BottomNavigation (
-                                elevation = 8.dp,
-                                backgroundColor = Color.Transparent,
                                 modifier = Modifier
-                                    .padding(8.dp)
                                     .background(
-                                        color = RedInit,
-                                        shape = RoundedCornerShape(20.dp)
-                                    )
+                                        color = MaterialTheme.colors.background
+                                    ),
+                                backgroundColor = MaterialTheme.colors.background
                             ){
                                 val navBackStackEntry by navController
                                     .currentBackStackEntryAsState()
@@ -81,8 +64,8 @@ class MainActivity : ComponentActivity() {
                                     ?.arguments?.getString(KEY_ROUTE)
                                 items.forEach {
                                     BottomNavigationItem(
-                                        unselectedContentColor = Color.White,
-                                        selectedContentColor = Color.Green,
+                                        unselectedContentColor = MaterialTheme.colors.background,
+                                        selectedContentColor = MaterialTheme.colors.onBackground,
                                         icon = { Icon(
                                             imageVector = it.icon,
                                             contentDescription = "Home"
@@ -98,6 +81,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                         },
                                         modifier = Modifier
+                                            .padding(8.dp)
                                             .background(
                                                 color = RedInit,
                                                 shape = RoundedCornerShape(20.dp)
@@ -109,7 +93,6 @@ class MainActivity : ComponentActivity() {
                         }
                     ){
                         SreenController(
-                            lifecycleOwner = this,
                             navController = navController,
                             topTitleBar = titless
                         )
@@ -122,7 +105,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SreenController(
-    lifecycleOwner: LifecycleOwner,
     navController: NavHostController,
     topTitleBar: MutableState<String>
 ) {
@@ -132,11 +114,11 @@ fun SreenController(
     )
     {
         composable("home") {
-            HomeScreen(lifecycleOwner)
+            HomeScreen()
             topTitleBar.value = "Home"
         }
         composable("hours") {
-            HoursScreen(lifecycleOwner)
+            HoursScreen()
             topTitleBar.value = "Hours"
         }
         composable("setting") {
