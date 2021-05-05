@@ -47,7 +47,7 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             val infiniteTransition = rememberInfiniteTransition()
             val red by infiniteTransition.animateColor(
                 initialValue = Red100,
-                targetValue = Red200,
+                targetValue = Red300,
                 animationSpec = infiniteRepeatable(
                     tween(durationMillis = 1000),
                     repeatMode = RepeatMode.Reverse
@@ -55,14 +55,14 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             )
             val green by infiniteTransition.animateColor(
                 initialValue = Green100,
-                targetValue = Green200,
+                targetValue = Green300,
                 animationSpec = infiniteRepeatable(
                     tween(durationMillis = 1000),
                     repeatMode = RepeatMode.Reverse
                 )
             )
             val color = if(enabled) green else red
-            val borderColor = if(enabled) Color.Green else Color.Red
+            //val borderColor = if(enabled) Green200 else Red200
             val buttonColors = ButtonDefaults.buttonColors(
                 backgroundColor = color
             )
@@ -77,6 +77,7 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                         val newDay = Day(now.time, null)
                         viewModel.insertDay(newDay)
                         viewModel.myPreference.setLogIn(false)
+                        viewModel.myPreference.setLastLogIn(now.time.time)
                     } else {
                         day?.timeLogOut = now.time
                         day?.let { viewModel.updateDay(it) }
@@ -87,10 +88,10 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 colors = buttonColors,
                 modifier = Modifier
                     .fillMaxSize(),
-                border = BorderStroke(
+                /*border = BorderStroke(
                     width = 10.dp,
                     color = borderColor
-                )
+                )*/
             ) {
                 Text(
                     text = text,

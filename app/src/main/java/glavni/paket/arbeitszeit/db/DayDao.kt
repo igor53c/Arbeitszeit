@@ -7,7 +7,6 @@ import java.util.*
 @Dao
 interface DayDao {
 
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertDay(day: Day)
 
@@ -26,5 +25,7 @@ interface DayDao {
     @Query("SELECT * from day_table order by id DESC")
     fun getAllDays(): LiveData<List<Day>>
 
+    @Query("SELECT * FROM day_table WHERE timeLogIn BETWEEN :start AND :end order by id DESC")
+    fun getAllDayInWeek(start: Date, end: Date): LiveData<List<Day>>
 
 }

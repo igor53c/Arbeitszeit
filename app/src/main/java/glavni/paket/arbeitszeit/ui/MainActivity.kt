@@ -40,9 +40,7 @@ class MainActivity : ComponentActivity() {
             ArbeitszeitTheme {
                 val navController = rememberNavController()
                 val titless = remember{ mutableStateOf("Home") }
-                // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    /**set TopApp And Bottom Bar*/
                     Scaffold (
                         bottomBar = {
                             val items = listOf<Screen>(
@@ -50,7 +48,6 @@ class MainActivity : ComponentActivity() {
                                 Screen.Hours,
                                 Screen.Setting
                             )
-                            /**set design*/
                             BottomNavigation (
                                 modifier = Modifier
                                     .background(
@@ -71,6 +68,12 @@ class MainActivity : ComponentActivity() {
                                             contentDescription = "Home"
                                         )},
                                         selected = currentRoute == it.route ,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .background(
+                                                color = RedInit,
+                                                shape = RoundedCornerShape(20.dp)
+                                            ),
                                         onClick = {
                                             navController.popBackStack(
                                                 navController.graph.startDestination,
@@ -79,13 +82,7 @@ class MainActivity : ComponentActivity() {
                                             if (currentRoute != it.route){
                                                 navController.navigate(it.route)
                                             }
-                                        },
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .background(
-                                                color = RedInit,
-                                                shape = RoundedCornerShape(20.dp)
-                                            )
+                                        }
                                     )
                                 }
                             }

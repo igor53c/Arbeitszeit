@@ -7,6 +7,7 @@ import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_BREAK_BEL
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_BREAK_OVER_9
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_HOURS_PER_WEEK
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_LANGUAGES
+import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_LAST_LOGIN
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_LOG_IN
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_KEY_ROUNDING
 import glavni.paket.arbeitszeit.other.Constants.SHARED_PREFERENCES_PREFIX
@@ -60,5 +61,10 @@ class MyPreference @Inject constructor(@ApplicationContext context : Context){
     fun setRounding(state: Boolean) {
         sharedPref.edit().putBoolean(SHARED_PREFERENCES_KEY_ROUNDING, state).apply()
     }
-
+    fun getLastLogIn(): Long {
+        return sharedPref.getLong(SHARED_PREFERENCES_KEY_LAST_LOGIN, 0)
+    }
+    fun setLastLogIn(state: Long) {
+        sharedPref.edit().putLong(SHARED_PREFERENCES_KEY_LAST_LOGIN, state).apply()
+    }
 }

@@ -8,6 +8,7 @@ import glavni.paket.arbeitszeit.db.Day
 import glavni.paket.arbeitszeit.other.MyPreference
 import glavni.paket.arbeitszeit.repositories.MainRepository
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,4 +28,6 @@ class MainViewModel @Inject constructor(
     fun updateDay(day: Day) = viewModelScope.launch { mainRepository.updateDay(day) }
 
     fun deleteAllDays() = mainRepository.deleteAllDays()
+
+    fun getAllDayInWeek(start: Date, end: Date) = mainRepository.getAllDayInWeek(start, end)
 }

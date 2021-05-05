@@ -3,6 +3,7 @@ package glavni.paket.arbeitszeit.repositories
 import androidx.lifecycle.LiveData
 import glavni.paket.arbeitszeit.db.Day
 import glavni.paket.arbeitszeit.db.DayDao
+import java.util.*
 import javax.inject.Inject
 
 class MainRepository @Inject constructor(val dayDao: DayDao) {
@@ -10,6 +11,8 @@ class MainRepository @Inject constructor(val dayDao: DayDao) {
     val getLastDay: LiveData<Day> = dayDao.getLastDay()
 
     val getAllDays: LiveData<List<Day>> = dayDao.getAllDays()
+
+    fun getAllDayInWeek(start: Date, end: Date) = dayDao.getAllDayInWeek(start, end)
 
     suspend fun insertDay(day: Day) = dayDao.insertDay(day)
 

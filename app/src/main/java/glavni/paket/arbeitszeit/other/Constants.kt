@@ -12,4 +12,5 @@ object Constants {
     const val SHARED_PREFERENCES_KEY_HOURS_PER_WEEK = "HoursPerWeek"
     const val SHARED_PREFERENCES_KEY_LANGUAGES = "Languages"
     const val SHARED_PREFERENCES_KEY_ROUNDING = "Rounding"
+    const val SHARED_PREFERENCES_KEY_LAST_LOGIN = "LastLogIn"
 }
