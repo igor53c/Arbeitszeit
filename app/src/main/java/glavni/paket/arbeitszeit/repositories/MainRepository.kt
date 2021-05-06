@@ -14,6 +14,10 @@ class MainRepository @Inject constructor(val dayDao: DayDao) {
 
     fun getAllDayInWeek(start: Date, end: Date) = dayDao.getAllDayInWeek(start, end)
 
+    fun isLogInExistBetweenTwoDate(start: Date, end: Date) = dayDao.isLogInExistBetweenTwoDate(start, end)
+
+    fun isLogOutExistBetweenTwoDate(start: Date, end: Date) = dayDao.isLogOutExistBetweenTwoDate(start, end)
+
     suspend fun insertDay(day: Day) = dayDao.insertDay(day)
 
     suspend fun deleteDay(day: Day) = dayDao.deleteDay(day)

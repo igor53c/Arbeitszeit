@@ -85,21 +85,27 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             modifier = Modifier
                 .padding(start = 8.dp, top = 24.dp, end = 8.dp, bottom = 0.dp)
         )
-        var breakBelow6 by remember { mutableStateOf(viewModel.myPreference.getBreakBelow6()) }
+        var breakBelow6String by remember { mutableStateOf(viewModel.myPreference.getBreakBelow6().toString()) }
         var breakBelow6ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
             maxLines = 1,
-            value = breakBelow6.toString(),
+            value = breakBelow6String,
             onValueChange = {
                 val test = it.toIntOrNull()
                 when {
-                    test == null -> { breakBelow6ErrorState = true }
-                    test < 0 -> { breakBelow6ErrorState = true }
+                    test == null -> {
+                        breakBelow6String = ""
+                        breakBelow6ErrorState = true
+                    }
+                    test < 0 || test > 500 -> {
+                        breakBelow6String = test.toString()
+                        breakBelow6ErrorState = true
+                    }
                     else -> {
-                        breakBelow6 = test
+                        breakBelow6String = test.toString()
                         breakBelow6ErrorState = false
-                        viewModel.myPreference.setBreakBelow6(breakBelow6)
+                        viewModel.myPreference.setBreakBelow6(test)
                     }
                 }
             },
@@ -108,24 +114,29 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 .fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(text = "Working time below 6 hours") },
-            isError = breakBelow6ErrorState,
-            placeholder = { Text(text = "0", maxLines = 1) }
+            isError = breakBelow6ErrorState
         )
-        var break6And9 by remember { mutableStateOf(viewModel.myPreference.getBreak6And9()) }
+        var break6And9String by remember { mutableStateOf(viewModel.myPreference.getBreak6And9().toString()) }
         var break6And9ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
             maxLines = 1,
-            value = break6And9.toString(),
+            value = break6And9String,
             onValueChange = {
                 val test = it.toIntOrNull()
                 when {
-                    test == null -> { break6And9ErrorState = true }
-                    test < 0 -> { break6And9ErrorState = true }
+                    test == null -> {
+                        break6And9String = ""
+                        break6And9ErrorState = true
+                    }
+                    test < 0 || test > 500 -> {
+                        break6And9String = test.toString()
+                        break6And9ErrorState = true
+                    }
                     else -> {
-                        break6And9 = test
+                        break6And9String = test.toString()
                         break6And9ErrorState = false
-                        viewModel.myPreference.setBreak6And9(break6And9)
+                        viewModel.myPreference.setBreak6And9(test)
                     }
                 }
             },
@@ -134,24 +145,29 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 .fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(text = "Working time between 6 and 9 hours") },
-            isError = break6And9ErrorState,
-            placeholder = { Text(text = "30") }
+            isError = break6And9ErrorState
         )
-        var breakOver9 by remember { mutableStateOf(viewModel.myPreference.getBreakOver9()) }
+        var breakOver9String by remember { mutableStateOf(viewModel.myPreference.getBreakOver9().toString()) }
         var breakOver9ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
             maxLines = 1,
-            value = breakOver9.toString(),
+            value = breakOver9String,
             onValueChange = {
                 val test = it.toIntOrNull()
                 when {
-                    test == null -> { breakOver9ErrorState = true }
-                    test < 0 -> { breakOver9ErrorState = true }
+                    test == null -> {
+                        breakOver9String = ""
+                        breakOver9ErrorState = true
+                    }
+                    test < 0 || test > 500 -> {
+                        breakOver9String = test.toString()
+                        breakOver9ErrorState = true
+                    }
                     else -> {
-                        breakOver9 = test
+                        breakOver9String = test.toString()
                         breakOver9ErrorState = false
-                        viewModel.myPreference.setBreakOver9(breakOver9)
+                        viewModel.myPreference.setBreakOver9(test)
                     }
                 }
             },
@@ -160,8 +176,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 .fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(text = "Working time over 9 hours") },
-            isError = breakOver9ErrorState,
-            placeholder = { Text(text = "45", maxLines = 1) }
+            isError = breakOver9ErrorState
         )
         var rounding by remember { mutableStateOf(viewModel.myPreference.getRounding()) }
         Row {
@@ -204,21 +219,27 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     .padding(start = 4.dp, end = 8.dp, top = 8.dp)
             )
         }
-        var hoursPerWeek by remember { mutableStateOf(viewModel.myPreference.getHoursPerWeek()) }
+        var hoursPerWeekString by remember { mutableStateOf(viewModel.myPreference.getHoursPerWeek().toString()) }
         var hoursPerWeekErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
             maxLines = 1,
-            value = hoursPerWeek.toString(),
+            value = hoursPerWeekString,
             onValueChange = {
                 val test = it.toFloatOrNull()
                 when {
-                    test == null -> { hoursPerWeekErrorState = true }
-                    test < 0.0f -> { hoursPerWeekErrorState = true }
+                    test == null -> {
+                        hoursPerWeekString = ""
+                        hoursPerWeekErrorState = true
+                    }
+                    test < 0.0 || test > 99.0 -> {
+                        hoursPerWeekString = test.toString()
+                        hoursPerWeekErrorState = true
+                    }
                     else -> {
-                        hoursPerWeek = test
+                        hoursPerWeekString = test.toString()
                         hoursPerWeekErrorState = false
-                        viewModel.myPreference.setHoursPerWeek(hoursPerWeek)
+                        viewModel.myPreference.setHoursPerWeek(test)
                     }
                 }
             },
@@ -227,8 +248,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 .fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             label = { Text(text = "Hours required per week") },
-            isError = hoursPerWeekErrorState,
-            placeholder = { Text(text = "40,00", maxLines = 1) }
+            isError = hoursPerWeekErrorState
         )
     }
 }

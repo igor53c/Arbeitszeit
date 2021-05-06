@@ -30,4 +30,8 @@ class MainViewModel @Inject constructor(
     fun deleteAllDays() = mainRepository.deleteAllDays()
 
     fun getAllDayInWeek(start: Date, end: Date) = mainRepository.getAllDayInWeek(start, end)
+
+    fun isLogInExistBetweenTwoDate(start: Date, end: Date) = mainRepository.isLogInExistBetweenTwoDate(start, end)
+
+    fun isLogOutExistBetweenTwoDate(start: Date, end: Date) = mainRepository.isLogOutExistBetweenTwoDate(start, end)
 }

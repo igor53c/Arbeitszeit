@@ -22,12 +22,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
+import glavni.paket.arbeitszeit.BaseApplication
 import glavni.paket.arbeitszeit.model.Screen
 import glavni.paket.arbeitszeit.ui.theme.*
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
 import glavni.paket.arbeitszeit.util.HomeScreen
 import glavni.paket.arbeitszeit.util.HoursScreen
 import glavni.paket.arbeitszeit.util.SettingScreen
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,22 +39,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ArbeitszeitTheme {
+            ArbeitszeitTheme(){
                 val navController = rememberNavController()
                 val titless = remember{ mutableStateOf("Home") }
                 Surface(color = MaterialTheme.colors.background) {
                     Scaffold (
                         bottomBar = {
-                            val items = listOf<Screen>(
+                            val items = listOf (
                                 Screen.Home,
                                 Screen.Hours,
                                 Screen.Setting
                             )
                             BottomNavigation (
                                 modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colors.background
-                                    ),
+                                    .background(color = MaterialTheme.colors.background),
                                 backgroundColor = MaterialTheme.colors.background
                             ){
                                 val navBackStackEntry by navController
@@ -62,8 +62,9 @@ class MainActivity : ComponentActivity() {
                                 items.forEach {
                                     BottomNavigationItem(
                                         unselectedContentColor = MaterialTheme.colors.background,
-                                        selectedContentColor = MaterialTheme.colors.onBackground,
-                                        icon = { Icon(
+                                        selectedContentColor = Green100,
+                                        icon = {
+                                            Icon(
                                             imageVector = it.icon,
                                             contentDescription = "Home"
                                         )},
@@ -71,7 +72,7 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .padding(8.dp)
                                             .background(
-                                                color = RedInit,
+                                                color = MaterialTheme.colors.primary,
                                                 shape = RoundedCornerShape(20.dp)
                                             ),
                                         onClick = {

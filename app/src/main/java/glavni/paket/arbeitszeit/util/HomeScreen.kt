@@ -6,6 +6,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,8 +24,10 @@ import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import glavni.paket.arbeitszeit.db.Day
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
 import androidx.compose.runtime.livedata.observeAsState
+import glavni.paket.arbeitszeit.BaseApplication
 import glavni.paket.arbeitszeit.ui.theme.*
 import java.util.*
+import javax.inject.Inject
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
@@ -33,8 +39,8 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             start.linkTo(parent.start)
             end.linkTo(parent.end)
             bottom.linkTo(parent.bottom)
-            width = Dimension.value(150.dp)
-            height = Dimension.value(150.dp)
+            width = Dimension.value(200.dp)
+            height = Dimension.value(200.dp)
         }
     }
     ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
@@ -44,31 +50,9 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
         ) {
             var enabled by remember { mutableStateOf(viewModel.myPreference.getLogIn())}
             val day = viewModel.getLastDay.observeAsState().value
-            val infiniteTransition = rememberInfiniteTransition()
-            val red by infiniteTransition.animateColor(
-                initialValue = Red100,
-                targetValue = Red300,
-                animationSpec = infiniteRepeatable(
-                    tween(durationMillis = 1000),
-                    repeatMode = RepeatMode.Reverse
-                )
-            )
-            val green by infiniteTransition.animateColor(
-                initialValue = Green100,
-                targetValue = Green300,
-                animationSpec = infiniteRepeatable(
-                    tween(durationMillis = 1000),
-                    repeatMode = RepeatMode.Reverse
-                )
-            )
-            val color = if(enabled) green else red
-            //val borderColor = if(enabled) Green200 else Red200
-            val buttonColors = ButtonDefaults.buttonColors(
-                backgroundColor = color
-            )
-            val text = if(enabled) "LOG IN" else "LOG OUT"
-            Button(
-                shape = RoundedCornerShape(30.dp),
+            val color = if(enabled) Green100 else Red100
+            val icon = if(enabled) Icons.Default.PlayArrow else Icons.Default.Pause
+            IconButton(
                 onClick = {
                     val now = Calendar.getInstance()
                     now.set(Calendar.SECOND, 0)
@@ -85,23 +69,17 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     }
                     enabled = !enabled
                 },
-                colors = buttonColors,
                 modifier = Modifier
-                    .fillMaxSize(),
-                /*border = BorderStroke(
-                    width = 10.dp,
-                    color = borderColor
-                )*/
+                    .fillMaxSize()
             ) {
-                Text(
-                    text = text,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                Icon(
+                    icon,
+                    contentDescription = "Log in",
+                    tint = color,
+                    modifier = Modifier.
+                            fillMaxSize()
                 )
             }
-
         }
-
     }
 }
