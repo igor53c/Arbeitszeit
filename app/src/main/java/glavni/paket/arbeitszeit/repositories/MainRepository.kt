@@ -8,9 +8,13 @@ import javax.inject.Inject
 
 class MainRepository @Inject constructor(val dayDao: DayDao) {
 
-    val getLastDay: LiveData<Day> = dayDao.getLastDay()
+    suspend fun insertDay(day: Day) = dayDao.insertDay(day)
 
-    val getAllDays: LiveData<List<Day>> = dayDao.getAllDays()
+    suspend fun deleteDay(day: Day) = dayDao.deleteDay(day)
+
+    suspend fun updateDay(day: Day) = dayDao.updateDay(day)
+
+    val getLastDay: LiveData<Day> = dayDao.getLastDay()
 
     fun getAllDayInWeek(start: Date, end: Date) = dayDao.getAllDayInWeek(start, end)
 
@@ -18,11 +22,4 @@ class MainRepository @Inject constructor(val dayDao: DayDao) {
 
     fun isLogOutExistBetweenTwoDate(start: Date, end: Date) = dayDao.isLogOutExistBetweenTwoDate(start, end)
 
-    suspend fun insertDay(day: Day) = dayDao.insertDay(day)
-
-    suspend fun deleteDay(day: Day) = dayDao.deleteDay(day)
-
-    suspend fun updateDay(day: Day) = dayDao.updateDay(day)
-
-    fun deleteAllDays() = dayDao.deleteAllDays()
 }

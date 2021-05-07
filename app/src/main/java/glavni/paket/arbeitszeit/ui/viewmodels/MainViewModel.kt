@@ -17,17 +17,13 @@ class MainViewModel @Inject constructor(
     val myPreference: MyPreference
 ): ViewModel() {
 
-    val getLastDay: LiveData<Day> = mainRepository.getLastDay
-
-    val getAllDays: LiveData<List<Day>> = mainRepository.getAllDays
-
     fun insertDay(day: Day) = viewModelScope.launch { mainRepository.insertDay(day) }
 
     fun deleteDay(day: Day) = viewModelScope.launch { mainRepository.deleteDay(day) }
 
     fun updateDay(day: Day) = viewModelScope.launch { mainRepository.updateDay(day) }
 
-    fun deleteAllDays() = mainRepository.deleteAllDays()
+    val getLastDay: LiveData<Day> = mainRepository.getLastDay
 
     fun getAllDayInWeek(start: Date, end: Date) = mainRepository.getAllDayInWeek(start, end)
 

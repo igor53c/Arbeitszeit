@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                                 items.forEach {
                                     BottomNavigationItem(
                                         unselectedContentColor = MaterialTheme.colors.background,
-                                        selectedContentColor = Green100,
+                                        selectedContentColor = Green50,
                                         icon = {
                                             Icon(
                                             imageVector = it.icon,

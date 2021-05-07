@@ -25,8 +25,16 @@ import java.util.*
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewModel = hiltNavGraphViewModel()): Boolean {
+    var errorText by remember { mutableStateOf("") }
+    val now by remember { mutableStateOf(Calendar.getInstance()) }
     var showDay by remember { mutableStateOf(showDayValue) }
     var delete by remember { mutableStateOf(false) }
+    var update by remember { mutableStateOf(false) }
+    var logOutChanged by remember { mutableStateOf(false) }
+    var logInHoursErrorState by remember { mutableStateOf(false) }
+    var logInMinutesErrorState by remember { mutableStateOf(false) }
+    var logOutHoursErrorState by remember { mutableStateOf(false) }
+    var logOutMinutesErrorState by remember { mutableStateOf(false) }
     var logInHours = 0
     var logInMinutes = 0
     var logOutHours = 0
@@ -73,12 +81,12 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                     fillMaxWidth()
                 ) {
                     var logInHoursString by remember { mutableStateOf(logInHours.toString()) }
-                    var logInHoursErrorState by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         singleLine = true,
                         maxLines = 1,
                         value = logInHoursString,
                         onValueChange = {
+                            errorText = ""
                             val test = it.toIntOrNull()
                             when {
                                 test == null -> {
@@ -91,6 +99,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                 }
                                 else -> {
                                     logInHoursString = test.toString()
+                                    logInHours = test
                                     logInHoursErrorState = false
                                 }
                             }
@@ -103,12 +112,12 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         isError = logInHoursErrorState
                     )
                     var logInMinutesString by remember { mutableStateOf(logInMinutes.toString()) }
-                    var logInMinutesErrorState by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         singleLine = true,
                         maxLines = 1,
                         value = logInMinutesString,
                         onValueChange = {
+                            errorText = ""
                             val test = it.toIntOrNull()
                             when {
                                 test == null -> {
@@ -121,6 +130,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                 }
                                 else -> {
                                     logInMinutesString = test.toString()
+                                    logInMinutes = test
                                     logInMinutesErrorState = false
                                 }
                             }
@@ -138,12 +148,13 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                     fillMaxWidth()
                 ) {
                     var logOutHoursString by remember { mutableStateOf(logOutHours.toString()) }
-                    var logOutHoursErrorState by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         singleLine = true,
                         maxLines = 1,
                         value = logOutHoursString,
                         onValueChange = {
+                            errorText = ""
+                            logOutChanged = true
                             val test = it.toIntOrNull()
                             when {
                                 test == null -> {
@@ -156,6 +167,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                 }
                                 else -> {
                                     logOutHoursString = test.toString()
+                                    logOutHours = test
                                     logOutHoursErrorState = false
                                 }
                             }
@@ -168,12 +180,13 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         isError = logOutHoursErrorState
                     )
                     var logOutMinutesString by remember { mutableStateOf(logOutMinutes.toString()) }
-                    var logOutMinutesErrorState by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         singleLine = true,
                         maxLines = 1,
                         value = logOutMinutesString,
                         onValueChange = {
+                            errorText = ""
+                            logOutChanged = true
                             val test = it.toIntOrNull()
                             when {
                                 test == null -> {
@@ -186,6 +199,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                 }
                                 else -> {
                                     logOutMinutesString = test.toString()
+                                    logOutMinutes = test
                                     logOutMinutesErrorState = false
                                 }
                             }
@@ -198,6 +212,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         isError = logOutMinutesErrorState
                     )
                 }
+                Text(text = errorText, color = MaterialTheme.colors.error)
             }
         },
         buttons = {
@@ -210,30 +225,28 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         delete = true
                     }
                 ) {
-                    if(delete) {
-                        if(dayDialog != null) {
-                            if(dayDialog.timeLogOut != null) {
-                                viewModel.deleteDay(dayDialog)
-                                if(dayDialog.timeLogIn?.time == viewModel.myPreference.getLastLogIn()) {
-                                    val lastDay = viewModel.getLastDay.observeAsState().value
-                                    if(lastDay != null) {
-                                        lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
-                                        delete = false
-                                        showDay = false
-                                    }
-                                } else {
-                                    showDay = false
-                                    delete = false
-                                }
-                            } else {
-                                viewModel.deleteDay(dayDialog)
+                    if(delete && dayDialog != null) {
+                        if(dayDialog.timeLogOut != null) {
+                            viewModel.deleteDay(dayDialog)
+                            if(dayDialog.timeLogIn?.time == viewModel.myPreference.getLastLogIn()) {
                                 val lastDay = viewModel.getLastDay.observeAsState().value
-                                viewModel.myPreference.setLogIn(true)
                                 if(lastDay != null) {
                                     lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
                                     delete = false
                                     showDay = false
                                 }
+                            } else {
+                                showDay = false
+                                delete = false
+                            }
+                        } else {
+                            viewModel.deleteDay(dayDialog)
+                            val lastDay = viewModel.getLastDay.observeAsState().value
+                            viewModel.myPreference.setLogIn(true)
+                            if(lastDay != null) {
+                                lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
+                                delete = false
+                                showDay = false
                             }
                         }
                     }
@@ -266,15 +279,104 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         .weight(.33f)
                         .padding(start = 8.dp, top = 0.dp, end = 16.dp, bottom = 16.dp),
                     onClick = {
-                        showDay = false
+                        update = true
                     }
                 ) {
+                    if(update && dayDialog != null && dayDialog.timeLogIn != null) {
+                        if (
+                            logInHoursErrorState || logInMinutesErrorState ||
+                            logOutHoursErrorState || logOutMinutesErrorState
+                        ) {
+                            errorText = "Error"
+                        } else {
+                            now.time = dayDialog.timeLogIn!!
+                            now.set(Calendar.HOUR_OF_DAY, logInHours)
+                            now.set(Calendar.MINUTE, logInMinutes)
+                            val dateLogIn = now.time
+                            now.set(Calendar.HOUR_OF_DAY, logOutHours)
+                            now.set(Calendar.MINUTE, logOutMinutes)
+                            val dateLogOut = now.time
+                            if(dayDialog.timeLogOut != null) {
+                                val dateLogInExist = viewModel
+                                    .isLogInExistBetweenTwoDate(dateLogOut, dayDialog.timeLogOut!!).observeAsState().value
+                                val dateLogOutExist = viewModel
+                                    .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                if(dateLogInExist != null && dateLogOutExist != null) {
+                                    if(!dateLogInExist && !dateLogOutExist) {
+                                        if(dateLogIn.before(dateLogOut)) {
+                                            val newNow = Calendar.getInstance()
+                                            if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
+                                                dayDialog.timeLogIn = dateLogIn
+                                                dayDialog.timeLogOut = dateLogOut
+                                                viewModel.updateDay(dayDialog)
+                                                update = false
+                                                showDay = false
+                                            } else {
+                                                errorText = "Log in/out can`t be in the future!"
+                                            }
+                                        } else {
+                                            errorText = "Log out must be after Log in!"
+                                        }
+                                    } else {
+                                        errorText = "Date overlap!"
+                                    }
+                                }
+                            } else {
+                                if(logOutChanged) {
+                                    val dateLogInExist = viewModel
+                                        .isLogInExistBetweenTwoDate(dayDialog.timeLogIn!!, dateLogOut).observeAsState().value
+                                    val dateLogOutExist = viewModel
+                                        .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                    if(dateLogInExist != null && dateLogOutExist != null) {
+                                        if(!dateLogInExist && !dateLogOutExist) {
+                                            if(dateLogIn.before(dateLogOut)) {
+                                                val newNow = Calendar.getInstance()
+                                                if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
+                                                    dayDialog.timeLogIn = dateLogIn
+                                                    dayDialog.timeLogOut = dateLogOut
+                                                    viewModel.updateDay(dayDialog)
+                                                    viewModel.myPreference.setLogIn(true)
+                                                    viewModel.myPreference.setLastLogIn(dateLogIn.time)
+                                                    update = false
+                                                    showDay = false
+                                                } else {
+                                                    errorText = "Log in/out can`t be in the future!"
+                                                }
+                                            } else {
+                                                errorText = "Log out must be after Log in!"
+                                            }
+                                        } else {
+                                            errorText = "Date overlap!"
+                                        }
+                                    }
+                                } else {
+                                    val dateLogOutExist = viewModel
+                                        .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                    if(dateLogOutExist != null) {
+                                        if(!dateLogOutExist) {
+                                            val newNow = Calendar.getInstance()
+                                            if(dateLogIn.before(newNow.time)) {
+                                                dayDialog.timeLogIn = dateLogIn
+                                                viewModel.updateDay(dayDialog)
+                                                update = false
+                                                showDay = false
+                                            } else {
+                                                errorText = "Log in can`t be in the future!"
+                                            }
+                                        } else {
+                                            errorText = "Date overlap!"
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
                     Icon(
                         Icons.Default.CheckCircle,
-                        contentDescription = "Check",
+                        contentDescription = "Update",
                         tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.
-                        fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

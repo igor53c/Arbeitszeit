@@ -16,22 +16,15 @@ interface DayDao {
     @Update
     suspend fun updateDay(day: Day)
 
-    @Query("SELECT * from day_table order by timeLogIn DESC, id DESC LIMIT 1")
+    @Query("select * from day_table order by timeLogIn desc, id desc limit 1")
     fun getLastDay(): LiveData<Day>
 
-    @Query("DELETE FROM day_table")
-    fun deleteAllDays()
-
-    @Query("SELECT * from day_table order by timeLogIn DESC")
-    fun getAllDays(): LiveData<List<Day>>
-
-    @Query("SELECT * FROM day_table WHERE timeLogIn BETWEEN :start AND :end order by timeLogIn DESC, id DESC")
+    @Query("select * from day_table where timeLogIn between :start and :end order by timeLogIn desc, id desc")
     fun getAllDayInWeek(start: Date, end: Date): LiveData<List<Day>>
 
-    @Query("SELECT EXISTS(SELECT * FROM day_table WHERE timeLogIn BETWEEN :start AND :end LIMIT 1)")
+    @Query("select exists(select * from day_table where (timeLogIn > :start and timeLogIn < :end) or (timeLogIn < :start and timeLogIn > :end) limit 1)")
     fun isLogInExistBetweenTwoDate(start: Date, end: Date) : LiveData<Boolean>
 
-    @Query("SELECT EXISTS(SELECT * FROM day_table WHERE timeLogOut BETWEEN :start AND :end LIMIT 1)")
+    @Query("select exists(select * from day_table where (timeLogOut > :start and timeLogOut < :end) or (timeLogOut < :start and timeLogOut > :end) limit 1)")
     fun isLogOutExistBetweenTwoDate(start: Date, end: Date) : LiveData<Boolean>
-
 }

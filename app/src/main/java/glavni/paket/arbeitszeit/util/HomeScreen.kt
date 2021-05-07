@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,11 +47,17 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 .layoutId("greenBox")
         ) {
             var enabled by remember { mutableStateOf(viewModel.myPreference.getLogIn())}
+            var clicked by remember { mutableStateOf(false)}
             val day = viewModel.getLastDay.observeAsState().value
-            val color = if(enabled) Green100 else Red100
-            val icon = if(enabled) Icons.Default.PlayArrow else Icons.Default.Pause
+            val icon = if(enabled) Icons.Default.PlayCircle else Icons.Default.PauseCircle
             IconButton(
                 onClick = {
+                   clicked = true
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                if(clicked) {
                     val now = Calendar.getInstance()
                     now.set(Calendar.SECOND, 0)
                     now.set(Calendar.MILLISECOND, 0)
@@ -62,20 +66,31 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                         viewModel.insertDay(newDay)
                         viewModel.myPreference.setLogIn(false)
                         viewModel.myPreference.setLastLogIn(now.time.time)
+                        clicked = false
                     } else {
-                        day?.timeLogOut = now.time
-                        day?.let { viewModel.updateDay(it) }
-                        viewModel.myPreference.setLogIn(true)
+                        if(day != null && day.timeLogIn != null) {
+                            if(day.timeLogIn!!.equals(now.time)) {
+                                viewModel.deleteDay(day)
+                                val lastDay = viewModel.getLastDay.observeAsState().value
+                                if(lastDay != null) {
+                                    viewModel.myPreference.setLogIn(true)
+                                    lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
+                                    clicked = false
+                                }
+                            } else {
+                                day.timeLogOut = now.time
+                                day.let { viewModel.updateDay(it) }
+                                viewModel.myPreference.setLogIn(true)
+                                clicked = false
+                            }
+                        }
                     }
                     enabled = !enabled
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+                }
                 Icon(
                     icon,
                     contentDescription = "Log in",
-                    tint = color,
+                    tint = MaterialTheme.colors.primary,
                     modifier = Modifier.
                             fillMaxSize()
                 )
