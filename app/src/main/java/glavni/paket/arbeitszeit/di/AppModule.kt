@@ -22,5 +22,13 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun providePeriodDao(db: DayDatabase) = db.getPeriodDao()
+
+    @Singleton
+    @Provides
     fun provideDayDao(db: DayDatabase) = db.getDayDao()
+
+    @Singleton
+    @Provides
+    fun provideWeekDao(db: DayDatabase) = db.getWeekDao()
 }

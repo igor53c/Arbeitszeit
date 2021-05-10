@@ -1,6 +1,7 @@
 package glavni.paket.arbeitszeit.util.hoursscreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,14 +18,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
-import glavni.paket.arbeitszeit.db.Day
+import glavni.paket.arbeitszeit.db.Period
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
+import glavni.paket.arbeitszeit.util.deletePeriodInDb
+import glavni.paket.arbeitszeit.util.updatePeriodInDb
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import java.text.SimpleDateFormat
 import java.util.*
 
+@ObsoleteCoroutinesApi
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewModel = hiltNavGraphViewModel()): Boolean {
+fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainViewModel = hiltNavGraphViewModel()): Boolean {
     var errorText by remember { mutableStateOf("") }
     val now by remember { mutableStateOf(Calendar.getInstance()) }
     var showDay by remember { mutableStateOf(showDayValue) }
@@ -43,20 +48,20 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
     var logInName = ""
     var logInYear = ""
     var logInMonth = ""
-    if(dayDialog != null) {
-        if(dayDialog.timeLogIn != null) {
+    if(periodDialog != null) {
+        if(periodDialog.timeLogIn != null) {
             val cal = Calendar.getInstance()
-            cal.time = dayDialog.timeLogIn!!
+            cal.time = periodDialog.timeLogIn!!
             logInHours = cal.get(Calendar.HOUR_OF_DAY)
             logInMinutes = cal.get(Calendar.MINUTE)
-            logInDay = SimpleDateFormat("dd").format(dayDialog.timeLogIn!!)
-            logInName = SimpleDateFormat("E").format(dayDialog.timeLogIn!!)
-            logInMonth = SimpleDateFormat("MMM").format(dayDialog.timeLogIn!!)
-            logInYear = SimpleDateFormat("yyyy").format(dayDialog.timeLogIn!!)
+            logInDay = SimpleDateFormat("dd").format(periodDialog.timeLogIn!!)
+            logInName = SimpleDateFormat("E").format(periodDialog.timeLogIn!!)
+            logInMonth = SimpleDateFormat("MMM").format(periodDialog.timeLogIn!!)
+            logInYear = SimpleDateFormat("yyyy").format(periodDialog.timeLogIn!!)
         }
-        if(dayDialog.timeLogOut != null) {
+        if(periodDialog.timeLogOut != null) {
             val cal = Calendar.getInstance()
-            cal.time = dayDialog.timeLogOut!!
+            cal.time = periodDialog.timeLogOut!!
             logOutHours = cal.get(Calendar.HOUR_OF_DAY)
             logOutMinutes = cal.get(Calendar.MINUTE)
         }
@@ -76,6 +81,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
         },
         text = {
             Column() {
+                Text(text = "Log in:")
                 Row (
                     modifier = Modifier.
                     fillMaxWidth()
@@ -106,9 +112,9 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         },
                         modifier = Modifier
                             .weight(.5f)
-                            .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
+                            .padding(end = 8.dp, bottom = 16.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "Log in hours") },
+                        label = { Text(text = "Hours") },
                         isError = logInHoursErrorState
                     )
                     var logInMinutesString by remember { mutableStateOf(logInMinutes.toString()) }
@@ -137,12 +143,13 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         },
                         modifier = Modifier
                             .weight(.5f)
-                            .padding(top = 8.dp, start = 8.dp, bottom = 8.dp),
+                            .padding(start = 8.dp, bottom = 16.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "Log in minutes") },
+                        label = { Text(text = "Minutes") },
                         isError = logInMinutesErrorState
                     )
                 }
+                Text(text = "Log out:")
                 Row (
                     modifier = Modifier.
                     fillMaxWidth()
@@ -174,9 +181,9 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         },
                         modifier = Modifier
                             .weight(.5f)
-                            .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
+                            .padding(end = 8.dp, bottom = 8.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "Log out hours") },
+                        label = { Text(text = "Hours") },
                         isError = logOutHoursErrorState
                     )
                     var logOutMinutesString by remember { mutableStateOf(logOutMinutes.toString()) }
@@ -206,9 +213,9 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         },
                         modifier = Modifier
                             .weight(.5f)
-                            .padding(top = 8.dp, start = 8.dp, bottom = 8.dp),
+                            .padding(start = 8.dp, bottom = 8.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text(text = "Log out minutes") },
+                        label = { Text(text = "Minutes") },
                         isError = logOutMinutesErrorState
                     )
                 }
@@ -225,28 +232,57 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         delete = true
                     }
                 ) {
-                    if(delete && dayDialog != null) {
-                        if(dayDialog.timeLogOut != null) {
-                            viewModel.deleteDay(dayDialog)
-                            if(dayDialog.timeLogIn?.time == viewModel.myPreference.getLastLogIn()) {
-                                val lastDay = viewModel.getLastDay.observeAsState().value
-                                if(lastDay != null) {
-                                    lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
-                                    delete = false
-                                    showDay = false
+                    if(delete && periodDialog != null) {
+                        if(periodDialog.timeLogOut != null) {
+                            val numPeriodInTable = viewModel.numberPeriodsInTable().observeAsState().value
+                            if(numPeriodInTable != null) {
+                                if(numPeriodInTable > 1) {
+                                    if(!deletePeriodInDb(periodDialog)) {
+                                        if (periodDialog.timeLogIn?.time == viewModel.myPreference.getLastLogIn()) {
+                                            val lastPeriod = viewModel.getLastPeriod.observeAsState().value
+                                            if (lastPeriod != null) {
+                                                lastPeriod.timeLogIn?.let {
+                                                    viewModel.myPreference.setLastLogIn(
+                                                        it.time
+                                                    )
+                                                }
+                                                delete = false
+                                                showDay = false
+                                            }
+                                        } else {
+                                            showDay = false
+                                            delete = false
+                                        }
+                                    }
+                                } else {
+                                    if(!deletePeriodInDb(periodDialog)) {
+                                        viewModel.myPreference.setLastLogIn(0)
+                                        delete = false
+                                        showDay = false
+                                    }
                                 }
-                            } else {
-                                showDay = false
-                                delete = false
                             }
                         } else {
-                            viewModel.deleteDay(dayDialog)
-                            val lastDay = viewModel.getLastDay.observeAsState().value
-                            viewModel.myPreference.setLogIn(true)
-                            if(lastDay != null) {
-                                lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
-                                delete = false
-                                showDay = false
+                            val numPeriodInTable = viewModel.numberPeriodsInTable().observeAsState().value
+                            if(numPeriodInTable != null) {
+                                if(numPeriodInTable > 1) {
+                                    if(!deletePeriodInDb(periodDialog)) {
+                                        val lastDay = viewModel.getLastPeriod.observeAsState().value
+                                        viewModel.myPreference.setLogIn(true)
+                                        if (lastDay != null) {
+                                            lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
+                                            delete = false
+                                            showDay = false
+                                        }
+                                    }
+                                } else {
+                                    if(!deletePeriodInDb(periodDialog)) {
+                                        viewModel.myPreference.setLastLogIn(0)
+                                        viewModel.myPreference.setLogIn(true)
+                                        delete = false
+                                        showDay = false
+                                    }
+                                }
                             }
                         }
                     }
@@ -262,9 +298,7 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                     modifier = Modifier
                         .weight(.33f)
                         .padding(start = 8.dp, top = 0.dp, end = 8.dp, bottom = 16.dp),
-                    onClick = {
-                        showDay = false
-                    }
+                    onClick = { showDay = false }
                 ) {
                     Icon(
                         Icons.Default.Cancel,
@@ -282,35 +316,34 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                         update = true
                     }
                 ) {
-                    if(update && dayDialog != null && dayDialog.timeLogIn != null) {
+                    if(update && periodDialog != null && periodDialog.timeLogIn != null) {
                         if (
                             logInHoursErrorState || logInMinutesErrorState ||
                             logOutHoursErrorState || logOutMinutesErrorState
                         ) {
                             errorText = "Error"
                         } else {
-                            now.time = dayDialog.timeLogIn!!
+                            now.time = periodDialog.timeLogIn!!
                             now.set(Calendar.HOUR_OF_DAY, logInHours)
                             now.set(Calendar.MINUTE, logInMinutes)
                             val dateLogIn = now.time
                             now.set(Calendar.HOUR_OF_DAY, logOutHours)
                             now.set(Calendar.MINUTE, logOutMinutes)
                             val dateLogOut = now.time
-                            if(dayDialog.timeLogOut != null) {
+                            if(periodDialog.timeLogOut != null) {
                                 val dateLogInExist = viewModel
-                                    .isLogInExistBetweenTwoDate(dateLogOut, dayDialog.timeLogOut!!).observeAsState().value
+                                    .isLogInExistBetweenTwoDate(dateLogOut, periodDialog.timeLogOut!!).observeAsState().value
                                 val dateLogOutExist = viewModel
-                                    .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                    .isLogOutExistBetweenTwoDate(dateLogIn, periodDialog.timeLogIn!!).observeAsState().value
                                 if(dateLogInExist != null && dateLogOutExist != null) {
                                     if(!dateLogInExist && !dateLogOutExist) {
                                         if(dateLogIn.before(dateLogOut)) {
                                             val newNow = Calendar.getInstance()
                                             if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
-                                                dayDialog.timeLogIn = dateLogIn
-                                                dayDialog.timeLogOut = dateLogOut
-                                                viewModel.updateDay(dayDialog)
-                                                update = false
-                                                showDay = false
+                                                if(!updatePeriodInDb(periodDialog, dateLogIn, dateLogOut)) {
+                                                    update = false
+                                                    showDay = false
+                                                }
                                             } else {
                                                 errorText = "Log in/out can`t be in the future!"
                                             }
@@ -324,21 +357,20 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                             } else {
                                 if(logOutChanged) {
                                     val dateLogInExist = viewModel
-                                        .isLogInExistBetweenTwoDate(dayDialog.timeLogIn!!, dateLogOut).observeAsState().value
+                                        .isLogInExistBetweenTwoDate(periodDialog.timeLogIn!!, dateLogOut).observeAsState().value
                                     val dateLogOutExist = viewModel
-                                        .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                        .isLogOutExistBetweenTwoDate(dateLogIn, periodDialog.timeLogIn!!).observeAsState().value
                                     if(dateLogInExist != null && dateLogOutExist != null) {
                                         if(!dateLogInExist && !dateLogOutExist) {
                                             if(dateLogIn.before(dateLogOut)) {
                                                 val newNow = Calendar.getInstance()
                                                 if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
-                                                    dayDialog.timeLogIn = dateLogIn
-                                                    dayDialog.timeLogOut = dateLogOut
-                                                    viewModel.updateDay(dayDialog)
-                                                    viewModel.myPreference.setLogIn(true)
-                                                    viewModel.myPreference.setLastLogIn(dateLogIn.time)
-                                                    update = false
-                                                    showDay = false
+                                                    if(!updatePeriodInDb(periodDialog, dateLogIn, dateLogOut)) {
+                                                        viewModel.myPreference.setLogIn(true)
+                                                        viewModel.myPreference.setLastLogIn(dateLogIn.time)
+                                                        update = false
+                                                        showDay = false
+                                                    }
                                                 } else {
                                                     errorText = "Log in/out can`t be in the future!"
                                                 }
@@ -351,15 +383,16 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                     }
                                 } else {
                                     val dateLogOutExist = viewModel
-                                        .isLogOutExistBetweenTwoDate(dateLogIn, dayDialog.timeLogIn!!).observeAsState().value
+                                        .isLogOutExistBetweenTwoDate(dateLogIn, periodDialog.timeLogIn!!)
+                                        .observeAsState().value
                                     if(dateLogOutExist != null) {
                                         if(!dateLogOutExist) {
                                             val newNow = Calendar.getInstance()
                                             if(dateLogIn.before(newNow.time)) {
-                                                dayDialog.timeLogIn = dateLogIn
-                                                viewModel.updateDay(dayDialog)
-                                                update = false
-                                                showDay = false
+                                                if(!updatePeriodInDb(periodDialog, dateLogIn, periodDialog.timeLogOut)) {
+                                                    update = false
+                                                    showDay = false
+                                                }
                                             } else {
                                                 errorText = "Log in can`t be in the future!"
                                             }
@@ -369,7 +402,6 @@ fun showDayDialog(dayDialog: Day?, showDayValue: Boolean, viewModel: MainViewMod
                                     }
                                 }
                             }
-
                         }
                     }
                     Icon(

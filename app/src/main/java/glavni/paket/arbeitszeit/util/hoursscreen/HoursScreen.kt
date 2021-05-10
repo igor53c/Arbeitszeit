@@ -1,8 +1,8 @@
 package glavni.paket.arbeitszeit.util
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,7 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
-import glavni.paket.arbeitszeit.db.Day
+import glavni.paket.arbeitszeit.db.Period
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
 import glavni.paket.arbeitszeit.util.hoursscreen.*
 import java.text.SimpleDateFormat
@@ -29,20 +29,21 @@ import java.util.*
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
+    var upClicked by remember { mutableStateOf(false)}
     var showDialogForDay by remember { mutableStateOf(false)}
-    var showDialogForWeek by remember { mutableStateOf(false)}
     var showDialogForAdd by remember { mutableStateOf(false)}
-    var dayDialog: Day? by remember { mutableStateOf(null)}
+    var periodDialog: Period? by remember { mutableStateOf(null)}
     val lastLogInLong by remember { mutableStateOf(viewModel.myPreference.getLastLogIn())}
     val lastLogIn = lastLogInLong.let { Date(it) }
-    val days = viewModel.getAllDayInWeek(
+    val periods = viewModel.getAllPeriodsInWeek(
+        getFirstDayOfWeek(lastLogIn),
+        getLastDayOfWeek(lastLogIn)
+    ).observeAsState().value
+    val days = viewModel.getAllDaysInWeek(
         getFirstDayOfWeek(lastLogIn),
         getLastDayOfWeek(lastLogIn)
     ).observeAsState().value
     Column {
-        if(showDialogForWeek) {
-            showDialogForWeek = showWeekDialog(days = days, showDialog = showDialogForWeek)
-        }
         if(showDialogForAdd) {
             showDialogForAdd = showAddDialog(showDialog = showDialogForAdd)
         }
@@ -54,9 +55,6 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colors.primary
                 )
-                .clickable {
-                    showDialogForWeek = true
-                }
                 ) {
             Row (
                 modifier = Modifier
@@ -66,7 +64,7 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                 Text(
                     modifier = Modifier
                         .weight(.33f),
-                    text = SimpleDateFormat("yyyy").format(lastLogIn).toString() ,
+                    text = SimpleDateFormat("MMM").format(lastLogIn).toString(),
                     textAlign = TextAlign.Start,
                     style = typography.body1,
                     fontSize = 20.sp,
@@ -76,7 +74,7 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                 Text(
                     modifier = Modifier
                         .weight(.33f),
-                    text = "Week " + SimpleDateFormat("ww").format(lastLogIn).toString() ,
+                    text = SimpleDateFormat("yyyy").format(lastLogIn).toString() ,
                     textAlign = TextAlign.Center,
                     style = typography.body1,
                     fontSize = 20.sp,
@@ -86,7 +84,7 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                 Text(
                     modifier = Modifier
                         .weight(.33f),
-                    text = "+7,00",
+                    text = "40,00",
                     textAlign = TextAlign.End,
                     style = typography.body1,
                     fontSize = 20.sp,
@@ -99,12 +97,26 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                     .fillMaxWidth()
                     .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 8.dp)
                     ) {
+                IconButton(
+                    onClick = { upClicked = true },
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(50.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ArrowCircleUp,
+                        contentDescription = "Up",
+                        tint = MaterialTheme.colors.background,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
                 Text(
                     modifier = Modifier
-                        .weight(.33f)
-                        .padding(top = 8.dp),
-                    text = SimpleDateFormat("MMM").format(lastLogIn).toString(),
-                    textAlign = TextAlign.Start,
+                        .weight(1f)
+                        .padding(top = 10.dp),
+                    text = "+7,00",
+                    textAlign = TextAlign.Center,
                     style = typography.body1,
                     fontSize = 20.sp,
                     color = MaterialTheme.colors.background,
@@ -115,33 +127,23 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                         showDialogForAdd = true
                     },
                     modifier = Modifier
-                        .weight(.33f)
+                        .width(50.dp)
+                        .height(50.dp)
                 ) {
                     Icon(
                         Icons.Default.AddCircle,
                         contentDescription = "Add",
                         tint = MaterialTheme.colors.background,
-                        modifier = Modifier.
-                        fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                     )
                 }
-                Text(
-                    modifier = Modifier
-                        .weight(.33f)
-                        .padding(top = 8.dp),
-                    text = "40,00",
-                    textAlign = TextAlign.End,
-                    style = typography.body1,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colors.background,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
         if(showDialogForDay) {
-            showDialogForDay = showDayDialog(dayDialog = dayDialog, showDayValue = showDialogForDay)
+            showDialogForDay = showDayDialog(periodDialog = periodDialog, showDayValue = showDialogForDay)
         }
-        if(days != null) {
+        if(upClicked && days != null) {
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)
@@ -149,9 +151,21 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
                 itemsIndexed(
                     items = days,
                     itemContent = { index, day ->
-                        if(animatedListDay(day = day, showDialogForDay)) {
+                        upClicked = animatedListDay(day)
+                    })
+            }
+        }
+        if(periods != null && !upClicked) {
+            LazyColumn (
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                itemsIndexed(
+                    items = periods,
+                    itemContent = { index, period ->
+                        if(animatedListPeriod(period = period, showDialogForDay)) {
                             showDialogForDay = true
-                            dayDialog = day
+                            periodDialog = period
                         }
                     })
             }
@@ -161,7 +175,7 @@ fun HoursScreen(viewModel: MainViewModel = hiltNavGraphViewModel()) {
 }
 
 fun getFirstDayOfWeek(date: Date): Date {
-    val cal = Calendar.getInstance()
+    val cal = Calendar.getInstance(Locale.GERMANY)
     cal.time = date
     cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
     cal.set(Calendar.HOUR_OF_DAY, 0)
@@ -170,10 +184,9 @@ fun getFirstDayOfWeek(date: Date): Date {
 }
 
 fun getLastDayOfWeek(date: Date): Date {
-    val cal = Calendar.getInstance()
+    val cal = Calendar.getInstance(Locale.GERMANY)
     cal.time = date
     cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-    cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH) + 7)
     cal.set(Calendar.HOUR_OF_DAY, 23)
     cal.set(Calendar.MINUTE, 59)
     return cal.time
