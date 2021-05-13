@@ -1,6 +1,5 @@
 package glavni.paket.arbeitszeit.util.hoursscreen
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import glavni.paket.arbeitszeit.db.Period
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
-import glavni.paket.arbeitszeit.util.insertPeriodInDb
+import glavni.paket.arbeitszeit.util.insertInDb
 import java.util.*
 
 @Composable
@@ -66,76 +65,6 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
         },
         text = {
             Column {
-                Row {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(.33f)
-                    ) {
-                        Text(
-                            text = "Work day",
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        selectedDay = "Work day"
-                                        workDay = true
-                                    })
-                        )
-                        RadioButton(
-                            selected = selectedDay == "Work day",
-                            onClick = {
-                                selectedDay = "Work day"
-                                workDay = true
-                            }
-                        )
-                    }
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(.33f)
-                    ) {
-                        Text(
-                            text = "Vacation",
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        selectedDay = "Vacation"
-                                        workDay = false
-                                    })
-                        )
-                        RadioButton(
-                            selected = selectedDay == "Vacation",
-                            onClick = {
-                                selectedDay = "Vacation"
-                                workDay = false
-                            }
-                        )
-                    }
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(.33f)
-                    ) {
-                        Text(
-                            text = "Sick leave",
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        selectedDay = "Sick leave"
-                                        workDay = false
-                                })
-                        )
-                        RadioButton(
-                            selected = selectedDay == "Sick leave",
-                            onClick = {
-                                selectedDay = "Sick leave"
-                                workDay = false
-                            }
-                        )
-                    }
-                }
                 Row (
                     modifier = Modifier.
                     fillMaxWidth()
@@ -458,12 +387,81 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                         )
                     }
                 }
-
+                Row {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(.33f)
+                    ) {
+                        Text(
+                            text = "Work day",
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        selectedDay = "Work day"
+                                        workDay = true
+                                    })
+                        )
+                        RadioButton(
+                            selected = selectedDay == "Work day",
+                            onClick = {
+                                selectedDay = "Work day"
+                                workDay = true
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(.33f)
+                    ) {
+                        Text(
+                            text = "Vacation",
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        selectedDay = "Vacation"
+                                        workDay = false
+                                    })
+                        )
+                        RadioButton(
+                            selected = selectedDay == "Vacation",
+                            onClick = {
+                                selectedDay = "Vacation"
+                                workDay = false
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(.33f)
+                    ) {
+                        Text(
+                            text = "Sick leave",
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        selectedDay = "Sick leave"
+                                        workDay = false
+                                    })
+                        )
+                        RadioButton(
+                            selected = selectedDay == "Sick leave",
+                            onClick = {
+                                selectedDay = "Sick leave"
+                                workDay = false
+                            }
+                        )
+                    }
+                }
                 Text(text = errorText, color = MaterialTheme.colors.error)
             }
         },
         buttons = {
-            Row() {
+            Row {
                 IconButton(
                     modifier = Modifier
                         .weight(.5f)
@@ -476,8 +474,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                         Icons.Default.Cancel,
                         contentDescription = "Cancel",
                         tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.
-                        fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
                 IconButton(
@@ -492,7 +489,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                             ) {
                                 errorText = "Error"
                             } else {
-                                now.setLenient(false)
+                                now.isLenient = false
                                 try {
                                     now.set(Calendar.YEAR, logInYear)
                                     now.set(Calendar.MONTH, logInMonth - 1)
@@ -516,7 +513,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                             ) {
                                 errorText = "Error"
                             } else {
-                                now.setLenient(false)
+                                now.isLenient = false
                                 try {
                                     now.set(Calendar.YEAR, logInYear)
                                     now.set(Calendar.MONTH, logInMonth - 1)
@@ -553,7 +550,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                                         if(dateLogOut!!.before(lastLogIn)) {
                                             val workingTime = dateLogOut!!.time - dateLogIn!!.time
                                             val newPeriod = Period(dateLogIn, dateLogOut, workDay, workingTime)
-                                            val clicked = insertPeriodInDb(newPeriod)
+                                            val clicked = insertInDb(newPeriod)
                                             if(!clicked) {
                                                 dateLogIn = null
                                                 dateLogOut = null
@@ -563,7 +560,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                                             if(viewModel.myPreference.getLogIn()) {
                                                 val workingTime = dateLogOut!!.time - dateLogIn!!.time
                                                 val newPeriod = Period(dateLogIn, dateLogOut, workDay, workingTime)
-                                                val clicked = insertPeriodInDb(newPeriod)
+                                                val clicked = insertInDb(newPeriod)
                                                 if(!clicked) {
                                                     dateLogIn = null
                                                     dateLogOut = null
@@ -588,8 +585,7 @@ fun showAddDialog(showDialog: Boolean, viewModel: MainViewModel = hiltNavGraphVi
                         Icons.Default.CheckCircle,
                         contentDescription = "Add",
                         tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.
-                        fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

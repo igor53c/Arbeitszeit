@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class MyPreference @Inject constructor(@ApplicationContext context : Context){
 
-    val sharedPref = context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE)
+    private val sharedPref = context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE)
 
     fun getLogIn(): Boolean {
         return sharedPref.getBoolean(SHARED_PREFERENCES_KEY_LOG_IN, true)

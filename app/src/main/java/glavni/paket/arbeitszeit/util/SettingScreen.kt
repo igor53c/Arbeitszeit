@@ -1,41 +1,34 @@
 package glavni.paket.arbeitszeit.util
 
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
-import timber.log.Timber
 
 @Composable
 fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
-
+    var selectedLanguage by remember { mutableStateOf(viewModel.myPreference.getLanguages()) }
+    var breakBelow6 by remember { mutableStateOf(viewModel.myPreference.getBreakBelow6()) }
+    var break6And9 by remember { mutableStateOf(viewModel.myPreference.getBreak6And9()) }
+    var breakOver9 by remember { mutableStateOf(viewModel.myPreference.getBreakOver9()) }
+    var hoursPerWeek by remember { mutableStateOf(viewModel.myPreference.getHoursPerWeek()) }
     Column (
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         verticalArrangement = Arrangement.Top
     ){
-        var selectedLanguage by remember { mutableStateOf(viewModel.myPreference.getLanguages()) }
         Spacer(modifier = Modifier.size(16.dp))
         Row {
             Text(
@@ -49,7 +42,6 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 selected = selectedLanguage == "English",
                 onClick = {
                     selectedLanguage = "English"
-                    viewModel.myPreference.setLanguages(selectedLanguage)
                 }
             )
             Text(
@@ -57,7 +49,6 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 modifier = Modifier
                     .clickable(onClick = {
                         selectedLanguage = "English"
-                        viewModel.myPreference.setLanguages(selectedLanguage)
                     })
                     .padding(start = 4.dp)
             )
@@ -66,7 +57,6 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 selected = selectedLanguage == "German",
                 onClick = {
                     selectedLanguage = "German"
-                    viewModel.myPreference.setLanguages(selectedLanguage)
                 }
             )
             Text(
@@ -74,7 +64,6 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                 modifier = Modifier
                     .clickable(onClick = {
                         selectedLanguage = "German"
-                        viewModel.myPreference.setLanguages(selectedLanguage)
                     })
                     .padding(start = 4.dp)
             )
@@ -85,7 +74,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             modifier = Modifier
                 .padding(start = 8.dp, top = 24.dp, end = 8.dp, bottom = 0.dp)
         )
-        var breakBelow6String by remember { mutableStateOf(viewModel.myPreference.getBreakBelow6().toString()) }
+        var breakBelow6String by remember { mutableStateOf(breakBelow6.toString()) }
         var breakBelow6ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
@@ -105,7 +94,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     else -> {
                         breakBelow6String = test.toString()
                         breakBelow6ErrorState = false
-                        viewModel.myPreference.setBreakBelow6(test)
+                        breakBelow6 = test
                     }
                 }
             },
@@ -116,7 +105,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             label = { Text(text = "Working time below 6 hours") },
             isError = breakBelow6ErrorState
         )
-        var break6And9String by remember { mutableStateOf(viewModel.myPreference.getBreak6And9().toString()) }
+        var break6And9String by remember { mutableStateOf(break6And9.toString()) }
         var break6And9ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
@@ -136,7 +125,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     else -> {
                         break6And9String = test.toString()
                         break6And9ErrorState = false
-                        viewModel.myPreference.setBreak6And9(test)
+                        break6And9 = test
                     }
                 }
             },
@@ -147,7 +136,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             label = { Text(text = "Working time between 6 and 9 hours") },
             isError = break6And9ErrorState
         )
-        var breakOver9String by remember { mutableStateOf(viewModel.myPreference.getBreakOver9().toString()) }
+        var breakOver9String by remember { mutableStateOf(breakOver9.toString()) }
         var breakOver9ErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
@@ -167,7 +156,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     else -> {
                         breakOver9String = test.toString()
                         breakOver9ErrorState = false
-                        viewModel.myPreference.setBreakOver9(test)
+                        breakOver9 = test
                     }
                 }
             },
@@ -188,38 +177,34 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             )
             RadioButton(
                 modifier = Modifier.padding(top = 8.dp),
-                selected = rounding == false,
+                selected = !rounding,
                 onClick = {
                     rounding = false
-                    viewModel.myPreference.setRounding(rounding)
                 })
             Text(
                 text = "No",
                 modifier = Modifier
                     .clickable(onClick = {
                         rounding = false
-                        viewModel.myPreference.setRounding(rounding)
                     })
                     .padding(start = 4.dp, end = 8.dp, top = 8.dp)
             )
             RadioButton(
                 modifier = Modifier.padding(top = 8.dp),
-                selected = rounding == true,
+                selected = rounding,
                 onClick = {
                     rounding = true
-                    viewModel.myPreference.setRounding(rounding)
                 })
             Text(
                 text = "Yes",
                 modifier = Modifier
                     .clickable(onClick = {
                         rounding = true
-                        viewModel.myPreference.setRounding(rounding)
                     })
                     .padding(start = 4.dp, end = 8.dp, top = 8.dp)
             )
         }
-        var hoursPerWeekString by remember { mutableStateOf(viewModel.myPreference.getHoursPerWeek().toString()) }
+        var hoursPerWeekString by remember { mutableStateOf(hoursPerWeek.toString()) }
         var hoursPerWeekErrorState by remember { mutableStateOf(false)}
         OutlinedTextField(
             singleLine = true,
@@ -239,7 +224,7 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     else -> {
                         hoursPerWeekString = test.toString()
                         hoursPerWeekErrorState = false
-                        viewModel.myPreference.setHoursPerWeek(test)
+                        hoursPerWeek = test
                     }
                 }
             },
@@ -250,5 +235,34 @@ fun SettingScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
             label = { Text(text = "Hours required per week") },
             isError = hoursPerWeekErrorState
         )
+        Box (
+            modifier = Modifier
+                .fillMaxWidth()
+                ) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .height(80.dp)
+                    .width(80.dp),
+                onClick = {
+                    viewModel.myPreference.setLanguages(selectedLanguage)
+                    viewModel.myPreference.setBreakBelow6(breakBelow6)
+                    viewModel.myPreference.setBreak6And9(break6And9)
+                    viewModel.myPreference.setBreakOver9(breakOver9)
+                    viewModel.myPreference.setRounding(rounding)
+                    viewModel.myPreference.setHoursPerWeek(hoursPerWeek)
+                    updateCompleteDb(viewModel)
+                }
+            ) {
+                Icon(
+                    Icons.Default.Save,
+                    contentDescription = "Save",
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(58.dp))
     }
 }

@@ -11,10 +11,10 @@ interface DayDao {
     fun insertDay(day: Day)
 
     @Delete
-    suspend fun deleteDay(day: Day)
+    fun deleteDay(day: Day)
 
     @Update
-    suspend fun updateDay(day: Day)
+    fun updateDay(day: Day)
 
     @Query("select exists(select * from day_table where firstLogIn between :start and :end)")
     fun isDayLogInExistBetweenTwoDate(start: Date, end: Date) : Boolean?
@@ -23,5 +23,11 @@ interface DayDao {
     fun getDayBetweenTwoDate(start: Date, end: Date) : Day?
 
     @Query("select * from day_table where firstLogIn between :start and :end order by firstLogIn desc, id desc")
-    fun getAllDaysInWeek(start: Date, end: Date): LiveData<List<Day>>
+    fun getAllDaysInWeekLive(start: Date, end: Date): LiveData<List<Day>>
+
+    @Query("select * from day_table where firstLogIn between :start and :end order by firstLogIn desc, id desc")
+    fun getAllDaysInWeek(start: Date, end: Date): List<Day>?
+
+    @Query("select * from day_table")
+    fun getAllDays(): List<Day>?
 }

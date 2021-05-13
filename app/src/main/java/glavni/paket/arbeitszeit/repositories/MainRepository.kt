@@ -1,14 +1,13 @@
 package glavni.paket.arbeitszeit.repositories
 
 import androidx.lifecycle.LiveData
-import glavni.paket.arbeitszeit.db.Day
-import glavni.paket.arbeitszeit.db.DayDao
-import glavni.paket.arbeitszeit.db.Period
-import glavni.paket.arbeitszeit.db.PeriodDao
+import glavni.paket.arbeitszeit.db.*
 import java.util.*
 import javax.inject.Inject
 
-class MainRepository @Inject constructor(val periodDao: PeriodDao, val dayDao: DayDao) {
+class MainRepository @Inject constructor(private val periodDao: PeriodDao,
+                                         private val dayDao: DayDao,
+                                         private val weekDao: WeekDao) {
 
     fun insertPeriod(period: Period) = periodDao.insertPeriod(period)
 
@@ -16,11 +15,13 @@ class MainRepository @Inject constructor(val periodDao: PeriodDao, val dayDao: D
 
     fun updatePeriod(period: Period) = periodDao.updatePeriod(period)
 
-    val getLastPeriod: LiveData<Period> = periodDao.getLastPeriod()
+    val getLastPeriodLive: LiveData<Period> = periodDao.getLastPeriodLive()
 
-    fun getAllPeriodsInWeek(start: Date, end: Date) = periodDao.getAllPeriodsInWeek(start, end)
+    fun getLastPeriod() = periodDao.getLastPeriod()
 
-    fun getAllPeriodsInWeek2(start: Date, end: Date) = periodDao.getAllPeriodsInWeek2(start, end)
+    fun getAllPeriodsBetweenTwoDateLive(start: Date, end: Date) = periodDao.getAllPeriodsBetweenTwoDateLive(start, end)
+
+    fun getAllPeriodsBetweenTwoDate(start: Date, end: Date) = periodDao.getAllPeriodsBetweenTwoDate(start, end)
 
     fun isLogInExistBetweenTwoDate(start: Date, end: Date) = periodDao.isLogInExistBetweenTwoDate(start, end)
 
@@ -34,13 +35,35 @@ class MainRepository @Inject constructor(val periodDao: PeriodDao, val dayDao: D
 
     fun insertDay(day: Day) = dayDao.insertDay(day)
 
-    suspend fun deleteDay(day: Day) = dayDao.deleteDay(day)
+    fun deleteDay(day: Day) = dayDao.deleteDay(day)
 
-    suspend fun updateDay(day: Day) = dayDao.updateDay(day)
+    fun updateDay(day: Day) = dayDao.updateDay(day)
 
     fun isDayLogInExistBetweenTwoDate(start: Date, end: Date) = dayDao.isDayLogInExistBetweenTwoDate(start, end)
 
     fun getDayBetweenTwoDate(start: Date, end: Date) = dayDao.getDayBetweenTwoDate(start, end)
 
+    fun getAllDaysInWeekLive(start: Date, end: Date) = dayDao.getAllDaysInWeekLive(start, end)
+
     fun getAllDaysInWeek(start: Date, end: Date) = dayDao.getAllDaysInWeek(start, end)
+
+    fun getAllDays() = dayDao.getAllDays()
+
+    fun insertWeek(week: Week) = weekDao.insertWeek(week)
+
+    fun deleteWeek(week: Week) = weekDao.deleteWeek(week)
+
+    fun updateWeek(week: Week) = weekDao.updateWeek(week)
+
+    fun isWeekExist(start: Date) = weekDao.isWeekExist(start)
+
+    fun getWeek(start: Date) = weekDao.getWeek(start)
+
+    fun getWeekLive(start: Date) = weekDao.getWeekLive(start)
+
+    fun getAllWeeksLive() = weekDao.getAllWeeksLive()
+
+    fun getAllWeeks() = weekDao.getAllWeeks()
+
+    fun getSumAllWeeks() = weekDao.getSumAllWeeks()
 }

@@ -40,7 +40,7 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
         ) {
             var enabled by remember { mutableStateOf(viewModel.myPreference.getLogIn())}
             var clicked by remember { mutableStateOf(false)}
-            val period = viewModel.getLastPeriod.observeAsState().value
+            val period = viewModel.getLastPeriodLive.observeAsState().value
             val icon = if(enabled) Icons.Default.PlayCircle else Icons.Default.PauseCircle
             IconButton(
                 onClick = {
@@ -50,14 +50,14 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                     .fillMaxSize()
             ) {
                 if(clicked) {
-                    val now = Calendar.getInstance()
+                    val now = Calendar.getInstance(Locale.GERMANY)
                     now.set(Calendar.SECOND, 0)
                     now.set(Calendar.MILLISECOND, 0)
                     if(enabled) {
                         val newPeriod = Period(now.time, null,true,null)
                         viewModel.myPreference.setLogIn(false)
                         viewModel.myPreference.setLastLogIn(now.time.time)
-                        clicked = insertPeriodInDb(newPeriod)
+                        clicked = insertInDb(newPeriod)
                         if(!clicked) enabled = !enabled
                     } else {
                         if(period?.timeLogIn != null) {
@@ -65,29 +65,12 @@ fun HomeScreen(viewModel: MainViewModel = hiltNavGraphViewModel()){
                             val timeLogIn = period.timeLogIn!!.time
                             period.workingTime =  now.time.time - timeLogIn
                             if(period.workingTime!! < 1) {
-                                val numPeriodInTable = viewModel.numberPeriodsInTable().observeAsState().value
-                                if(numPeriodInTable != null) {
-                                    if(numPeriodInTable > 1) {
-                                        if(!deletePeriodInDb(period)) {
-                                            val lastPeriod = viewModel.getLastPeriod.observeAsState().value
-                                            if(lastPeriod != null) {
-                                                viewModel.myPreference.setLogIn(true)
-                                                lastPeriod.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
-                                                clicked = false
-                                                enabled = !enabled
-                                            }
-                                        }
-                                    } else {
-                                        if(!deletePeriodInDb(period)) {
-                                            viewModel.myPreference.setLogIn(true)
-                                            viewModel.myPreference.setLastLogIn(0)
-                                            clicked = false
-                                            enabled = !enabled
-                                        }
-                                    }
+                                if(!deleteData(period)) {
+                                    clicked = false
+                                    enabled = !enabled
                                 }
                             } else {
-                                if(!updatePeriodInDb(period, null, null)) {
+                                if(!updateInDb(period, null, null)) {
                                     viewModel.myPreference.setLogIn(true)
                                     clicked = false
                                     enabled = !enabled

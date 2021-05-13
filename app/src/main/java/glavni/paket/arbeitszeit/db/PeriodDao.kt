@@ -17,13 +17,16 @@ interface PeriodDao {
     fun updatePeriod(period: Period)
 
     @Query("select * from period_table order by timeLogIn desc, id desc limit 1")
-    fun getLastPeriod(): LiveData<Period>
+    fun getLastPeriodLive(): LiveData<Period>
+
+    @Query("select * from period_table order by timeLogIn desc, id desc limit 1")
+    fun getLastPeriod(): Period?
 
     @Query("select * from period_table where timeLogIn between :start and :end order by timeLogIn desc, id desc")
-    fun getAllPeriodsInWeek(start: Date, end: Date): LiveData<List<Period>>
+    fun getAllPeriodsBetweenTwoDateLive(start: Date, end: Date): LiveData<List<Period>>
 
     @Query("select * from period_table where timeLogIn between :start and :end order by timeLogIn desc, id desc")
-    fun getAllPeriodsInWeek2(start: Date, end: Date): List<Period>?
+    fun getAllPeriodsBetweenTwoDate(start: Date, end: Date): List<Period>?
 
     @Query("select exists(select * from period_table where (timeLogIn > :start and timeLogIn < :end) or (timeLogIn < :start and timeLogIn > :end) limit 1)")
     fun isLogInExistBetweenTwoDate(start: Date, end: Date) : LiveData<Boolean>
@@ -38,5 +41,5 @@ interface PeriodDao {
     fun numberPeriodBetweenTwoDate(start: Date, end: Date): Int?
 
     @Query("select count(*) from period_table")
-    fun numberPeriodsInTable(): LiveData<Int>
+    fun numberPeriodsInTable(): Int?
 }

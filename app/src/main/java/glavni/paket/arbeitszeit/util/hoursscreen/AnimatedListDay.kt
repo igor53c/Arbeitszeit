@@ -1,7 +1,6 @@
 package glavni.paket.arbeitszeit.util.hoursscreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -14,20 +13,21 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import glavni.paket.arbeitszeit.db.Day
-import glavni.paket.arbeitszeit.db.Period
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun animatedListDay(day: Day?): Boolean {
-    var upClicked by remember { mutableStateOf(true) }
+fun animatedListDay(day: Day?): Day? {
+    var returnDay: Day? by remember { mutableStateOf(null) }
     val animatedProgress = remember { Animatable(initialValue = 0f) }
     LaunchedEffect(Unit) {
         animatedProgress.animateTo(
@@ -35,20 +35,21 @@ fun animatedListDay(day: Day?): Boolean {
             animationSpec = tween(400, easing = FastOutSlowInEasing)
         )
     }
-    val colorOnSurface = MaterialTheme.colors.onSurface
-    var color by remember { mutableStateOf(colorOnSurface) }
-    if(day != null && day.workDay != null && day.workDay == false) {
-        color = MaterialTheme.colors.primaryVariant
-    }
     Row(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .background(shape = RoundedCornerShape(12.dp), color = color)
+            .background(
+                shape = RoundedCornerShape(topStart = 12.dp, bottomEnd = 12.dp),
+                brush = Brush.horizontalGradient(
+                    colors = listOf(MaterialTheme.colors.secondary, MaterialTheme.colors.secondaryVariant),
+                    startX = 0f,
+                    endX = 1000f
+                ))
             .fillMaxWidth()
             .height(50.dp)
             .graphicsLayer(rotationX = animatedProgress.value)
             .clickable {
-                upClicked = false
+                returnDay = day
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -67,8 +68,8 @@ fun animatedListDay(day: Day?): Boolean {
                 logOut = SimpleDateFormat("HH:mm").format(day.lastLogOut!!)
                 val timeDifference: Long = day.workingTime!!
                 val minute = timeDifference / (1000 * 60) % 60
-                val hour = timeDifference / (1000 * 60 * 60) % 24
-                diff = String.format(Locale.getDefault(), "%02d:%02d", Math.abs(hour), Math.abs(minute));
+                val hour = timeDifference / (1000 * 60 * 60)
+                diff = String.format(Locale.getDefault(), "%02d:%02d", abs(hour), abs(minute))
             }
         }
         Spacer(modifier = Modifier.width(8.dp))
@@ -81,8 +82,7 @@ fun animatedListDay(day: Day?): Boolean {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = Modifier
-                .width(50.dp),
+            modifier = Modifier.width(50.dp),
             text = logInName,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1,
@@ -111,12 +111,14 @@ fun animatedListDay(day: Day?): Boolean {
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
+            modifier = Modifier.width(60.dp),
             text = diff,
+            textAlign = TextAlign.End,
             style = MaterialTheme.typography.body1,
             fontSize = 20.sp,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.width(8.dp))
     }
-    return upClicked
+    return returnDay
 }

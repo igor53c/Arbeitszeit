@@ -8,23 +8,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = Gray50,
+    primary = Blau10,
     onPrimary = Gray100,
-    primaryVariant = Color.Green,
-    secondary = Blau50,
-    onSecondary = Blau100,
-    onSurface = Gray100,
+    primaryVariant = BlauLight100,
+    secondary = BlauLight50,
+    secondaryVariant = UltramarineBlue50,
+    onSecondary = Gray40,
+    onSurface = Blau10,
     background = Color.Black,
     error = Color.Red
 )
 
 private val LightColorPalette = lightColors(
     primary = Gray100,
-    onPrimary = Gray50,
-    primaryVariant = Green50,
-    secondary = Blau100,
-    onSecondary = Blau50,
-    onSurface = Gray50,
+    onPrimary = Blau10,
+    primaryVariant = BlauLight100,
+    secondary = BlauLight50,
+    secondaryVariant = UltramarineBlue50,
+    onSecondary = Blau10,
+    onSurface = UltramarineBlue50,
     background = Color.White,
     error = Color.Red
 )
@@ -32,7 +34,7 @@ private val LightColorPalette = lightColors(
 @Composable
 fun ArbeitszeitTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
         DarkColorPalette

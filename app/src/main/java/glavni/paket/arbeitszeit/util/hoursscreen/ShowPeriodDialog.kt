@@ -1,7 +1,6 @@
 package glavni.paket.arbeitszeit.util.hoursscreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import glavni.paket.arbeitszeit.db.Period
 import glavni.paket.arbeitszeit.ui.viewmodels.MainViewModel
-import glavni.paket.arbeitszeit.util.deletePeriodInDb
-import glavni.paket.arbeitszeit.util.updatePeriodInDb
+import glavni.paket.arbeitszeit.util.deleteData
+import glavni.paket.arbeitszeit.util.updateInDb
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,7 +28,7 @@ import java.util.*
 @ObsoleteCoroutinesApi
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainViewModel = hiltNavGraphViewModel()): Boolean {
+fun showPeriodDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainViewModel = hiltNavGraphViewModel()): Boolean {
     var errorText by remember { mutableStateOf("") }
     val now by remember { mutableStateOf(Calendar.getInstance()) }
     var showDay by remember { mutableStateOf(showDayValue) }
@@ -73,14 +72,14 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
         title = {
             Text(
                 modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-                text = logInName + " " + logInDay + " " + logInMonth + " " + logInYear,
+                text = "$logInName $logInDay $logInMonth $logInYear",
                 style = MaterialTheme.typography.body1,
                 fontSize = 20.sp,
                 overflow = TextOverflow.Ellipsis
             )
         },
         text = {
-            Column() {
+            Column {
                 Text(text = "Log in:")
                 Row (
                     modifier = Modifier.
@@ -223,7 +222,7 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
             }
         },
         buttons = {
-            Row() {
+            Row {
                 IconButton(
                     modifier = Modifier
                         .weight(.33f)
@@ -233,57 +232,9 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
                     }
                 ) {
                     if(delete && periodDialog != null) {
-                        if(periodDialog.timeLogOut != null) {
-                            val numPeriodInTable = viewModel.numberPeriodsInTable().observeAsState().value
-                            if(numPeriodInTable != null) {
-                                if(numPeriodInTable > 1) {
-                                    if(!deletePeriodInDb(periodDialog)) {
-                                        if (periodDialog.timeLogIn?.time == viewModel.myPreference.getLastLogIn()) {
-                                            val lastPeriod = viewModel.getLastPeriod.observeAsState().value
-                                            if (lastPeriod != null) {
-                                                lastPeriod.timeLogIn?.let {
-                                                    viewModel.myPreference.setLastLogIn(
-                                                        it.time
-                                                    )
-                                                }
-                                                delete = false
-                                                showDay = false
-                                            }
-                                        } else {
-                                            showDay = false
-                                            delete = false
-                                        }
-                                    }
-                                } else {
-                                    if(!deletePeriodInDb(periodDialog)) {
-                                        viewModel.myPreference.setLastLogIn(0)
-                                        delete = false
-                                        showDay = false
-                                    }
-                                }
-                            }
-                        } else {
-                            val numPeriodInTable = viewModel.numberPeriodsInTable().observeAsState().value
-                            if(numPeriodInTable != null) {
-                                if(numPeriodInTable > 1) {
-                                    if(!deletePeriodInDb(periodDialog)) {
-                                        val lastDay = viewModel.getLastPeriod.observeAsState().value
-                                        viewModel.myPreference.setLogIn(true)
-                                        if (lastDay != null) {
-                                            lastDay.timeLogIn?.let { viewModel.myPreference.setLastLogIn(it.time) }
-                                            delete = false
-                                            showDay = false
-                                        }
-                                    }
-                                } else {
-                                    if(!deletePeriodInDb(periodDialog)) {
-                                        viewModel.myPreference.setLastLogIn(0)
-                                        viewModel.myPreference.setLogIn(true)
-                                        delete = false
-                                        showDay = false
-                                    }
-                                }
-                            }
+                        if(!deleteData(periodDialog)) {
+                            showDay = false
+                            delete = false
                         }
                     }
                     Icon(
@@ -340,7 +291,7 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
                                         if(dateLogIn.before(dateLogOut)) {
                                             val newNow = Calendar.getInstance()
                                             if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
-                                                if(!updatePeriodInDb(periodDialog, dateLogIn, dateLogOut)) {
+                                                if(!updateInDb(periodDialog, dateLogIn, dateLogOut)) {
                                                     update = false
                                                     showDay = false
                                                 }
@@ -365,7 +316,7 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
                                             if(dateLogIn.before(dateLogOut)) {
                                                 val newNow = Calendar.getInstance()
                                                 if(dateLogIn.before(newNow.time) || dateLogOut.before(newNow.time)) {
-                                                    if(!updatePeriodInDb(periodDialog, dateLogIn, dateLogOut)) {
+                                                    if(!updateInDb(periodDialog, dateLogIn, dateLogOut)) {
                                                         viewModel.myPreference.setLogIn(true)
                                                         viewModel.myPreference.setLastLogIn(dateLogIn.time)
                                                         update = false
@@ -389,7 +340,7 @@ fun showDayDialog(periodDialog: Period?, showDayValue: Boolean, viewModel: MainV
                                         if(!dateLogOutExist) {
                                             val newNow = Calendar.getInstance()
                                             if(dateLogIn.before(newNow.time)) {
-                                                if(!updatePeriodInDb(periodDialog, dateLogIn, periodDialog.timeLogOut)) {
+                                                if(!updateInDb(periodDialog, dateLogIn, periodDialog.timeLogOut)) {
                                                     update = false
                                                     showDay = false
                                                 }

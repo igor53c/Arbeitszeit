@@ -19,15 +19,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import glavni.paket.arbeitszeit.db.Period
+import glavni.paket.arbeitszeit.db.Week
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun animatedListPeriod(period: Period?, state: Boolean): Boolean {
-    var showDay by remember { mutableStateOf(state) }
+fun animatedListWeek(week: Week?): Week? {
+    var returnWeek: Week? by remember { mutableStateOf(null) }
     val animatedProgress = remember { Animatable(initialValue = 0f) }
     LaunchedEffect(Unit) {
         animatedProgress.animateTo(
@@ -43,84 +43,78 @@ fun animatedListPeriod(period: Period?, state: Boolean): Boolean {
                 brush = Brush.horizontalGradient(
                     colors = listOf(MaterialTheme.colors.secondary, MaterialTheme.colors.secondaryVariant),
                     startX = 0f,
-                    endX = 500f
+                    endX = 1500f
                 ))
             .fillMaxWidth()
             .height(50.dp)
             .graphicsLayer(rotationX = animatedProgress.value)
             .clickable {
-                showDay = true
+                returnWeek = week
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var logIn = ""
-        var logOut = ""
-        var logInDay = "--"
-        var logInName = "---"
-        var diff = ""
-        if(period != null) {
-            if(period.timeLogIn != null) {
-                logIn = SimpleDateFormat("HH:mm").format(period.timeLogIn!!)
-                logInDay = SimpleDateFormat("dd").format(period.timeLogIn!!)
-                logInName = SimpleDateFormat("E").format(period.timeLogIn!!)
-            }
-            if(period.timeLogOut != null && period.workingTime != null) {
-                logOut = SimpleDateFormat("HH:mm").format(period.timeLogOut!!)
-                val timeDifference: Long = period.workingTime!!
+        var date = ""
+        var workingTime = ""
+        var balance = ""
+        if(week != null) {
+            val start = SimpleDateFormat("dd/MM").format(week.start!!)
+            val end = SimpleDateFormat("dd/MM/''yy").format(week.end!!)
+            date = "$start - $end"
+            if(week.workingTime != null) {
+                val timeDifference: Long = week.workingTime!!
                 val minute = timeDifference / (1000 * 60) % 60
                 val hour = timeDifference / (1000 * 60 * 60)
-                diff = String.format(Locale.getDefault(), "%02d:%02d", abs(hour), abs(minute))
+                workingTime = String.format(Locale.getDefault(), "%02d:%02d", abs(hour), abs(minute))
+            }
+            if(week.balance != null) {
+                balance = getLongTimeToString(week.balance!!, true)
             }
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = logInDay,
+            text = date,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1,
-            fontSize = 20.sp,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = Modifier.width(50.dp),
-            text = logInName,
-            textAlign = TextAlign.Center,
+            text = balance,
             style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center,
             fontSize = 20.sp,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Row(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Text(
-                text = logIn,
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(0.5f)
-            )
-            Text(
-                text = logOut,
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(0.5f)
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = Modifier.width(60.dp),
-            text = diff,
-            textAlign = TextAlign.End,
+            text = workingTime,
             style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center,
             fontSize = 20.sp,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.width(8.dp))
     }
-    val showDay2 = showDay
-    showDay = false
-    return showDay2
+    return returnWeek
+}
+
+fun getLongTimeToString(num: Long, plus: Boolean): String {
+    val returnString: String
+    var timeDifference: Long = num
+    if(timeDifference < 0) {
+        timeDifference = abs(timeDifference)
+        val minute = timeDifference / (1000 * 60) % 60
+        val hour = timeDifference / (1000 * 60 * 60)
+        returnString = String.format(Locale.getDefault(), "-%02d:%02d", abs(hour), abs(minute))
+    } else {
+        val minute = timeDifference / (1000 * 60) % 60
+        val hour = timeDifference / (1000 * 60 * 60)
+        returnString = if(plus) {
+            String.format(Locale.getDefault(), "+%02d:%02d", abs(hour), abs(minute))
+        } else {
+            String.format(Locale.getDefault(), "%02d:%02d", abs(hour), abs(minute))
+        }
+    }
+    return returnString
 }
